@@ -19,6 +19,16 @@ console.debug('Initializing worker');
     }
 
     await mod.default({{wasm_bg}});
+
+    // wasm-bindgen registers a message handler during init. Lock the
+    // onmessage setter so future assignments can't add duplicate
+    // listeners alongside our addEventListener handler.
+    self.onmessage = null;
+    Object.defineProperty(self, 'onmessage', {
+        set: function(v) {},
+        get: function() { return null; },
+    });
+
     self.postMessage({ success: true });
     console.debug('Worker started');
 
@@ -86,6 +96,14 @@ initHandler = async function(event) {
 
         // Remove this listener and add the task handler
         self.removeEventListener('message', initHandler);
+
+        // Lock onmessage to prevent wasm-bindgen's handler from firing
+        // alongside addEventListener.
+        self.onmessage = null;
+        Object.defineProperty(self, 'onmessage', {
+            set: function(v) {},
+            get: function() { return null; },
+        });
 
         // Add the main message handler for tasks
         self.addEventListener('message', async event => {
