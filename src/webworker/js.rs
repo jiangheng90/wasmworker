@@ -25,7 +25,7 @@ console.debug('Initializing worker');
     // listeners alongside our addEventListener handler.
     self.onmessage = null;
     Object.defineProperty(self, 'onmessage', {
-        set: function(v) {},
+        set: function(v) { console.warn('wasmworker: assignment to self.onmessage ignored; message handling is reserved for task dispatch'); },
         get: function() { return null; },
     });
 
@@ -101,7 +101,7 @@ initHandler = async function(event) {
         // alongside addEventListener.
         self.onmessage = null;
         Object.defineProperty(self, 'onmessage', {
-            set: function(v) {},
+            set: function(v) { console.warn('wasmworker: assignment to self.onmessage ignored; message handling is reserved for task dispatch'); },
             get: function() { return null; },
         });
 
